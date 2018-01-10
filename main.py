@@ -3,10 +3,13 @@ import os
 from flask import Flask, request, redirect, url_for,render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
+import time
 
 
 # face import
+import base64
 from PIL import Image
+import numpy as np
 import face_recognition
 import cv2
 # face import end
@@ -27,8 +30,35 @@ def allowed_file(filename):
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
+    return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
+
+
+def base64_to_cv2_img(uri):
+    encoded_data = uri.split(',')[1]
+    imgData = base64.b64decode(encoded_data)
+    nparr = np.fromstring(imgData, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    #img_np = cv2.imdecode(nparr,cv2.CV_LOAD_IMAGE_COLOR)
+    return img
+def save_img(img):
+    millis = int(round(time.time()*1000))
+    filename="%s.png" % (millis)
+    img_file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    cv2.imwrite(img_file_path,img) ##save
+    print("\n\n\n path:%s" % (img_file_path))
+    return img_file_path
+
+@app.route('/api/face/findfaces',methods=['GET', 'POST'])
+def api_face():
+    if request.method == 'POST':
+        return render_template('face.html')
+        #img_base64=request.form['img_base64']
+        #img = base64_to_cv2_img(img_base64)
+        #img_file_path=save_img(img)
+        #cv2.imshow(img)
+        #return img_file_path
+    if request.method == 'GET':
+        return render_template('face.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def face():

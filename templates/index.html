@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="ui large header">face</div>
 {% if text %}
   <img src="{{ url_for('static', filename='build/'+text) }}" />
 {% endif %}
@@ -6,3 +9,4 @@
   <p><input type=file name=file>
      <input type=submit value=Upload>
 </form>
+{% endblock %}
