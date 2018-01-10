@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import time
 from flask import jsonify
+import hashlib
 
 
 # face import
@@ -24,7 +25,24 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['BUILD_FOLDER'] = BUILD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-
+def get_file_md5(file_path):
+    md5 = "none"
+    if os.path.isfile(file_path):
+        f = open(file_path,'rb')
+        md5_obj = hashlib.md5()
+        md5_obj.update(f.read())
+        hash_code = md5_obj.hexdigest()
+        f.close()
+        md5 = str(hash_code).lower()
+    return md5
+def get_img_md5(img):
+    md5="none"
+    md5_obj = hashlib.md5()
+    md5_obj.update(cv2.imencode('.jpg', img)[1])
+    hash_code = md5_obj.hexdigest()
+    md5 = str(hash_code).lower()
+    print("md5:%s" % (md5))
+    return md5
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -43,14 +61,20 @@ def base64_to_cv2_img(uri):
     return img
 def save_img(img):
     millis = int(round(time.time()*1000))
-    filename="%s.png" % (millis)
+
+    #filename="%s.png" % (millis)
+
+    img_md5=get_img_md5(img)
+
+    filename="%s.png" % (img_md5)
+
     img_file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename)
     cv2.imwrite(img_file_path,img) ##save
     print("\n\n\n path:%s" % (img_file_path))
     return img_file_path
 
 @app.route('/api/face/findfaces',methods=['GET', 'POST'])
-def api_face():
+def api_findfaces():
     if request.method == 'POST':
         img_base64=request.form['img_base64']
         img = base64_to_cv2_img(img_base64)
@@ -85,43 +109,46 @@ def api_face():
         content="data:image/jpeg;base64,%s" % (content)
         return jsonify(base64=content,faces=faces)
 
-@app.route('/', methods=['GET', 'POST'])
-def face():
+@app.route('/api/face/recognize_faces',methods=['GET', 'POST'])
+def api_recognize_faces():
     if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            #flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            #flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            img_file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-            img_build_file_path=os.path.join(app.config['BUILD_FOLDER'], filename)
-            file.save(img_file_path)
-            #return redirect(url_for('uploaded_file',filename=filename))
-            img_file=img_file_path
-            image = face_recognition.load_image_file(img_file)
-            img = cv2.imread(img_file)
-            face_locations = face_recognition.face_locations(image)
-            print("I found {} face(s) in this photograph.".format(len(face_locations)))
-            for face_location in face_locations:
-                # Print the location of each face in this image
-                top, right, bottom, left = face_location
-                print("A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
-                # You can access the actual face itself like this:
-                face_image = image[top:bottom, left:right]
-                pil_image = Image.fromarray(face_image)
-                cv2.rectangle(img, (left, top), (right, bottom), (0, 0, 255), 2)
-                #pil_image.show() #face图片 单独的
-            cv2.imwrite(img_build_file_path,img, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
-            return render_template('index.html',text=filename)
-    if request.method == 'GET':
-        return render_template('face.html',title="面部识别")
+        img_base64_a=request.form['img_base64_a']
+        img_base64_b=request.form['img_base64_b']
+
+        img_a = base64_to_cv2_img(img_base64_a)
+        img_b = base64_to_cv2_img(img_base64_b)
+
+        img_a_file_path=save_img(img_a)
+        img_b_file_path=save_img(img_b)
+
+        image_a = face_recognition.load_image_file(img_a_file_path)
+        image_b = face_recognition.load_image_file(img_b_file_path)
+
+        face_a_encoding = face_recognition.face_encodings(image_a)[0]
+        face_b_encoding = face_recognition.face_encodings(image_b)[0]
+
+        known_faces = [
+            face_a_encoding
+        ]
+
+        results = face_recognition.compare_faces(known_faces, face_b_encoding)
+        if(results[0]):
+            return jsonify(is_same="yes")
+        else:
+            return jsonify(is_same="no")
+
+
+
+
+@app.route('/')
+def home():
+    return render_template('index.html',title="face++")
+@app.route('/find_faces')
+def find_faces():
+    return render_template('find_faces.html',title="人脸识别")
+@app.route('/recognize_faces')
+def recognize_faces():
+    return render_template('recognize_faces.html',title="人脸对比")
 if __name__=='__main__':
     app.run(debug=True,host='0.0.0.0')
