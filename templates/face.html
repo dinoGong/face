@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="ui large header">face</div>
+<h1 class="ui header">Face 检测</h1>
 {% if text %}
   <img src="{{ url_for('static', filename='build/'+text) }}" />
 {% endif %}
 
 <style>
+body{
+  text-align: center;
+}
 #loading{
   font-size: 1rem;
     position: fixed;
@@ -17,6 +20,12 @@
     margin: 0;
     display: none;
 }
+img{
+  max-height:100%;
+  max-width:100%;
+  margin: 0 auto;
+  display:none
+}
 </style>
 
 <div id="loading" class="ui segment">
@@ -25,12 +34,16 @@
   </div>
   <p></p>
 </div>
+    <div class="ui action input">
+      <input id="select_pic" type="file" >
+      <button id="post" class="ui teal right labeled icon button">
+          <i class="checkmark icon"></i>检测
+      </button>
+    </div>
 
-    <input id="select_pic" class="ui primary button" type="file">
-    faces:<span id="faces"></span>
-    <img id="in_img" style="max-height:100%;max-width:100%;width:100%;display:none">
-    <img id="out_img" style="max-height:100%;max-width:100%;width:100%;display:none">
-    <button id="post" class="ui primary button">检测</button>
+    <img id="in_img">
+    <img id="out_img">
+
     <script>
         var base64="";
 
