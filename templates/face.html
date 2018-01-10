@@ -6,52 +6,42 @@
 {% endif %}
 
 
-    <input id="testFile" type="file">
-
-    <img id="testImg" style="max-height: 300px; height: 8em; min-width:8em;">
-
-    <textarea id="testArea" style="display: block; width: 100%;height: 30em;"></textarea>
-    <input id="btnTest" type="button" value="提交base" />
+    <input id="select_pic" type="file">
+    faces:<span id="faces"></span>
+    <img id="in_img" style="max-height: 300px; height: 8em; min-width:8em;">
+    <img id="out_img" style="max-height: 300px; height: 8em; min-width:8em;">
+    <input id="post" type="button" value="提交base" />
     <script>
+        var base64="";
 
-
-        $("#testFile").change(function () {
+        $("#select_pic").change(function () {
             run(this, function (data) {
-                $('#testImg').attr('src', data);
-                $('#testArea').val(data);
+                $('#in_img').attr('src', data);
+                base64=data;
             });
         });
 
-        $("#btnTest").click(function () {
-          $.ajax({
-              type: 'POST',
-              url: '/api/face/findfaces',
-              data: {"img_base64": $("#testArea").val()}, // or JSON.stringify ({name: 'jonas'}),
-              success: function(data) { alert('success: ' + data.Data); },
-              error: function (data) {
-                  console.log(data);
-              },
-              contentType: "application/json",
-              dataType: 'json'
-          });
-            /*
+        $("#post").click(function () {
+
             $.ajax({
                 url: "/api/face/findfaces",
                 type: "post",
                 dataType: "json",
                 data: {
-                    "img_base64": $("#testArea").val(),
+                    "img_base64": base64,
                 },
-                async: false,
+                async: true,
                 success: function (result) {
-                    if (result.Code == 200) {
-                        alert(result.Data);
-                    } else {
-
-                    }
-
+                  //
+                  $('#out_img').attr('src', result.base64);
+                  $('#faces').text(result.faces)
+                    console.log('msg:');
+                    console.dir(result);
+                },
+                error: function (result) {
+                    console.dir(result);
                 }
-            });*/
+            });
         });
 
         function run(input_file, get_data) {

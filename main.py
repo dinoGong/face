@@ -4,6 +4,7 @@ from flask import Flask, request, redirect, url_for,render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import time
+from flask import jsonify
 
 
 # face import
@@ -51,14 +52,38 @@ def save_img(img):
 @app.route('/api/face/findfaces',methods=['GET', 'POST'])
 def api_face():
     if request.method == 'POST':
-        return render_template('face.html')
-        #img_base64=request.form['img_base64']
-        #img = base64_to_cv2_img(img_base64)
-        #img_file_path=save_img(img)
+        img_base64=request.form['img_base64']
+        img = base64_to_cv2_img(img_base64)
+        img_file_path=save_img(img)
+
+
+        img_file=img_file_path
+        image = face_recognition.load_image_file(img_file)
+        #img = cv2.imread(img_file)
+        face_locations = face_recognition.face_locations(image)
+        faces=len(face_locations)
+        print("I found {} face(s) in this photograph.".format(len(face_locations)))
+        for face_location in face_locations:
+            # Print the location of each face in this image
+            top, right, bottom, left = face_location
+            print("A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
+            # You can access the actual face itself like this:
+            face_image = image[top:bottom, left:right]
+            pil_image = Image.fromarray(face_image)
+            cv2.rectangle(img, (left, top), (right, bottom), (0, 0, 255), 2)
+            #pil_image.show() #face图片 单独的
+        #cv2.imwrite(img_build_file_path,img, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
         #cv2.imshow(img)
-        #return img_file_path
-    if request.method == 'GET':
-        return render_template('face.html')
+
+
+        #data = cv2.imencode('.jpg', frame)[1].tostring()
+
+        bytes_data = cv2.imencode('.jpg', img)[1]
+        content=base64.b64encode(bytes_data)
+        #content = base64.encodebytes(bytes_data)
+        content=str(content, encoding = "utf-8")
+        content="data:image/jpeg;base64,%s" % (content)
+        return jsonify(base64=content,faces=faces)
 
 @app.route('/', methods=['GET', 'POST'])
 def face():
@@ -97,6 +122,6 @@ def face():
             cv2.imwrite(img_build_file_path,img, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
             return render_template('index.html',text=filename)
     if request.method == 'GET':
-        return render_template('index.html')
+        return render_template('face.html')
 if __name__=='__main__':
     app.run(debug=True,host='0.0.0.0')
