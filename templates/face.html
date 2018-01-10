@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+<br>
 <h1 class="ui header">Face 检测</h1>
+<div class="ui small header">图片中的脸数：<span id="faces">待检测</span></div>
 {% if text %}
   <img src="{{ url_for('static', filename='build/'+text) }}" />
 {% endif %}
@@ -8,6 +10,9 @@
 <style>
 body{
   text-align: center;
+}
+h1{
+  margin-top: 20px;
 }
 #loading{
   font-size: 1rem;
@@ -25,6 +30,9 @@ img{
   max-width:100%;
   margin: 0 auto;
   display:none
+}
+input{
+  width: 50%;
 }
 </style>
 
@@ -53,6 +61,7 @@ img{
                 base64=data;
                 $('#in_img').show();
                 $('#out_img').hide();
+                $('#faces').text('待检测');
 
 
             });

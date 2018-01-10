@@ -122,6 +122,6 @@ def face():
             cv2.imwrite(img_build_file_path,img, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
             return render_template('index.html',text=filename)
     if request.method == 'GET':
-        return render_template('face.html')
+        return render_template('face.html',title="面部识别")
 if __name__=='__main__':
     app.run(debug=True,host='0.0.0.0')
