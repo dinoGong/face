@@ -5,12 +5,32 @@
   <img src="{{ url_for('static', filename='build/'+text) }}" />
 {% endif %}
 
+<style>
+#loading{
+  font-size: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.9;
+    margin: 0;
+    display: none;
+}
+</style>
 
-    <input id="select_pic" type="file">
+<div id="loading" class="ui segment">
+  <div class="ui active dimmer">
+  <div class="ui text loader">正在计算，请稍后。。。</div>
+  </div>
+  <p></p>
+</div>
+
+    <input id="select_pic" class="ui primary button" type="file">
     faces:<span id="faces"></span>
     <img id="in_img" style="max-height:100%;max-width:100%;width:100%;display:none">
     <img id="out_img" style="max-height:100%;max-width:100%;width:100%;display:none">
-    <input id="post" type="button" value="提交base" />
+    <button id="post" class="ui primary button">检测</button>
     <script>
         var base64="";
 
@@ -20,11 +40,13 @@
                 base64=data;
                 $('#in_img').show();
                 $('#out_img').hide();
+
+
             });
         });
 
         $("#post").click(function () {
-
+            $('#loading').show();
             $.ajax({
                 url: "/api/face/findfaces",
                 type: "post",
@@ -35,6 +57,7 @@
                 async: true,
                 success: function (result) {
                   //
+                  $('#loading').hide();
                   $('#out_img').attr('src', result.base64);
                   $('#faces').text(result.faces)
                   $('#in_img').hide();
