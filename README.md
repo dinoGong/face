@@ -13,6 +13,7 @@ sudo pacman -S boost
 ```
 sudo pip install face_recognition
 sudo pip install pillow
+sudo pip install numpy
 ```
 
 
