@@ -143,6 +143,7 @@ def api_findfaces():
 
             #开始对比
             face_unknow_encoding = face_recognition.face_encodings(face_image)[0]
+
             image_mayun = face_recognition.load_image_file(app.config['AVATAR_FOLDER']+"/mayun.png")
             face_know_encoding=face_recognition.face_encodings(image_mayun)[0]
             known_faces = [
@@ -157,6 +158,31 @@ def api_findfaces():
                 #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
                 find_users.append({"name":"马云"})
 
+            image_gonghui = face_recognition.load_image_file(app.config['AVATAR_FOLDER']+"/gonghui.png")
+            face_know_encoding=face_recognition.face_encodings(image_gonghui)[0]
+            known_faces = [
+                face_know_encoding
+            ]
+
+            results = face_recognition.compare_faces(known_faces, face_unknow_encoding)
+            #results = face_recognition.compare_faces(face_unknow_locations,known_faces)
+            if(results[0]):
+                #font=cv2.FONT_HERSHEY_SIMPLEX
+                #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
+                find_users.append({"name":"semioe董事长：宫辉"})
+
+            image_mayingjie = face_recognition.load_image_file(app.config['AVATAR_FOLDER']+"/mayingjie.png")
+            face_know_encoding=face_recognition.face_encodings(image_mayingjie)[0]
+            known_faces = [
+                face_know_encoding
+            ]
+
+            results = face_recognition.compare_faces(known_faces, face_unknow_encoding)
+            #results = face_recognition.compare_faces(face_unknow_locations,known_faces)
+            if(results[0]):
+                #font=cv2.FONT_HERSHEY_SIMPLEX
+                #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
+                find_users.append({"name":"semioe CEO：马英杰"})        
             #对比结束
 
         #data = cv2.imencode('.jpg', frame)[1].tostring()
