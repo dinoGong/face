@@ -111,8 +111,8 @@ def api_findfaces():
             width=max_width
             b=o_width/width
             height=int(o_height/b)
-            smail_img = cv2.resize(img, (height, width), interpolation=cv2.INTER_CUBIC)
-            img=smail_img
+            img = cv2.resize(img, (height, width), interpolation=cv2.INTER_CUBIC)
+
         #end
 
         img_file_path=save_img(img)
@@ -138,9 +138,22 @@ def api_findfaces():
             save_face_into_faces(face_image) #保存面部到faces中
             #end
 
+            #开始对比
+            face_unknow_encoding = face_recognition.face_encodings(face_image)[0]
+            image_mayun = face_recognition.load_image_file(app.config['AVATAR_FOLDER']+"/mayun.png")
+            face_know_encoding=face_recognition.face_encodings(image_mayun)[0]
+            known_faces = [
+                face_know_encoding
+            ]
+
+            results = face_recognition.compare_faces(known_faces, face_unknow_encoding)
+            #results = face_recognition.compare_faces(face_unknow_locations,known_faces)
+            if(results[0]):
+                print("马云")
+            #对比结束
 
         #data = cv2.imencode('.jpg', frame)[1].tostring()
-        bytes_data = cv2.imencode('.jpg', smail_img)[1]
+        bytes_data = cv2.imencode('.jpg', img)[1]
         content=base64.b64encode(bytes_data)
         #content = base64.encodebytes(bytes_data)
         content=str(content, encoding = "utf-8")
