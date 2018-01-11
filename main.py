@@ -167,7 +167,7 @@ def api_recognize_faces():
 
 @app.route('/')
 def home():
-    return render_template('index.html',title="face++")
+    return render_template('index.html',title="人脸识别")
 @app.route('/find_faces')
 def find_faces():
     return render_template('find_faces.html',title="人脸识别")

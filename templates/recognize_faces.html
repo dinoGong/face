@@ -55,6 +55,15 @@ input{
     <img id="img_a">
     <img id="img_b">
 
+  <div id="alert_msg" class="ui modal">
+    <div class="header">信息提示</div>
+    <div class="content">
+      <p id="message"></p>
+    </div>
+    <div class="actions">
+      <div class="ui cancel button">好的</div>
+    </div>
+  </div>
     <script>
         var base64_a="";
         var base64_b="";
@@ -89,15 +98,20 @@ input{
                   //
                   if(result.err=="yes"){
                     $('#is_same').text(result.msg);
+                    $('#message').text(result.msg);
                   }
                   if(result.err=="no"){
                     if(result.is_same=="yes"){
                         $('#is_same').text('同一个人');
+                        $('#message').text('同一个人');
                     }
                     if(result.is_same=="no"){
                         $('#is_same').text('不是同一个人');
+                        $('#message').text('不是同一个人');
                     }
                   }
+
+                  $('.modal').modal('show')
 
                   $('#loading').hide();
                     console.log('msg:');
@@ -113,14 +127,16 @@ input{
             /*input_file：文件按钮对象*/
             /*get_data: 转换成功后执行的方法*/
             if (typeof (FileReader) === 'undefined') {
-                alert("抱歉，你的浏览器不支持 FileReader，不能将图片转换为Base64，请使用现代浏览器操作！");
+                $('#message').text('抱歉，你的浏览器不支持 FileReader，不能将图片转换为Base64，请使用现代浏览器操作！');
+                $('.modal').modal('show')
             } else {
                 try {
                     /*图片转Base64 核心代码*/
                     var file = input_file.files[0];
                     //这里我们判断下类型如果不是图片就返回 去掉就可以上传任意文件
                     if (!/image\/\w+/.test(file.type)) {
-                        alert("请确保文件为图像类型");
+                        $('#message').text('请确保文件为图像类型');
+                        $('.modal').modal('show')
                         return false;
                     }
                     var reader = new FileReader();
@@ -129,7 +145,8 @@ input{
                     }
                     reader.readAsDataURL(file);
                 } catch (e) {
-                    alert('图片转Base64出错啦！' + e.toString())
+                    $('#message').text('图片转Base64出错啦！');
+                    $('.modal').modal('show')
                 }
             }
         }
