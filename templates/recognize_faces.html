@@ -87,12 +87,18 @@ input{
                 async: true,
                 success: function (result) {
                   //
-                  if(result.is_same=="yes"){
-                      $('#is_same').text('同一个人');
+                  if(result.err=="yes"){
+                    $('#is_same').text(result.msg);
                   }
-                  if(result.is_same=="no"){
-                      $('#is_same').text('不是同一个人');
+                  if(result.err=="no"){
+                    if(result.is_same=="yes"){
+                        $('#is_same').text('同一个人');
+                    }
+                    if(result.is_same=="no"){
+                        $('#is_same').text('不是同一个人');
+                    }
                   }
+
                   $('#loading').hide();
                     console.log('msg:');
                     console.dir(result);

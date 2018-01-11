@@ -116,6 +116,14 @@ def api_recognize_faces():
         img_base64_a=request.form['img_base64_a']
         img_base64_b=request.form['img_base64_b']
 
+        # 2018-01-11 fixbug no img
+        if(len(img_base64_a)<10):
+            return jsonify(err="yes",msg="请上传图1")
+        if(len(img_base64_b)<10):
+            return jsonify(err="yes",msg="请上传图2")
+        # 2018-01-11 fixbug no img end
+
+
         img_a = base64_to_cv2_img(img_base64_a)
         img_b = base64_to_cv2_img(img_base64_b)
 
@@ -124,6 +132,22 @@ def api_recognize_faces():
 
         image_a = face_recognition.load_image_file(img_a_file_path)
         image_b = face_recognition.load_image_file(img_b_file_path)
+
+        # 2018-01-11 fixbug not human face
+
+        face_a_locations = face_recognition.face_locations(image_a)
+        face_b_locations = face_recognition.face_locations(image_b)
+
+        if(len(face_a_locations)==0):
+            return jsonify(err="yes",msg="图1识别不到人脸")
+        if(len(face_a_locations)>1):
+            return jsonify(err="yes",msg="图1有多张人脸")
+        if(len(face_b_locations)==0):
+            return jsonify(err="yes",msg="图2识别不到人脸")
+        if(len(face_b_locations)>1):
+            return jsonify(err="yes",msg="图2有多张人脸")
+
+        # 2018-01-11 fixbug not human face end
 
         face_a_encoding = face_recognition.face_encodings(image_a)[0]
         face_b_encoding = face_recognition.face_encodings(image_b)[0]
@@ -134,9 +158,9 @@ def api_recognize_faces():
 
         results = face_recognition.compare_faces(known_faces, face_b_encoding)
         if(results[0]):
-            return jsonify(is_same="yes")
+            return jsonify(err="no",is_same="yes")
         else:
-            return jsonify(is_same="no")
+            return jsonify(err="no",is_same="no")
 
 
 
