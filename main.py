@@ -18,11 +18,23 @@ import cv2
 
 UPLOAD_FOLDER = os.path.dirname(os.path.abspath('static'))+'/static/uploads'
 BUILD_FOLDER = os.path.dirname(os.path.abspath('static'))+'/static/build'
+
+#2018-01-11
+AVATAR_FOLDER = os.path.dirname(os.path.abspath('static'))+'/static/avatar'
+FACES_FOLDER = os.path.dirname(os.path.abspath('static'))+'/static/faces'
+#end
+
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app=Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['BUILD_FOLDER'] = BUILD_FOLDER
+
+#2018-01-11
+app.config['AVATAR_FOLDER'] = AVATAR_FOLDER
+app.config['FACES_FOLDER'] = FACES_FOLDER
+#end
+
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 def get_file_md5(file_path):
@@ -73,11 +85,36 @@ def save_img(img):
     print("\n\n\n path:%s" % (img_file_path))
     return img_file_path
 
+# 2018-01-11
+def save_face_into_faces(img):
+    img_md5=get_img_md5(img)
+    filename="%s.png" % (img_md5)
+    img_file_path=os.path.join(app.config['FACES_FOLDER'], filename)
+    cv2.imwrite(img_file_path,img) ##save
+    print("\n\n\n path:%s" % (img_file_path))
+    return img_file_path
 @app.route('/api/face/findfaces',methods=['GET', 'POST'])
 def api_findfaces():
     if request.method == 'POST':
         img_base64=request.form['img_base64']
+
+        if(len(img_base64)<10):
+            return jsonify(err="yes",msg="请上传图片")
+
         img = base64_to_cv2_img(img_base64)
+
+        #2018-01-11 图片缩放
+        o_width=img.shape[0]
+        o_height=img.shape[1]
+        max_width=800
+        if(o_width>max_width):
+            width=max_width
+            b=o_width/width
+            height=int(o_height/b)
+            smail_img = cv2.resize(img, (height, width), interpolation=cv2.INTER_CUBIC)
+            img=smail_img
+        #end
+
         img_file_path=save_img(img)
 
 
@@ -92,22 +129,23 @@ def api_findfaces():
             top, right, bottom, left = face_location
             print("A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
             # You can access the actual face itself like this:
-            face_image = image[top:bottom, left:right]
+            face_image = image[top:bottom, left:right] #识别到的人脸
             pil_image = Image.fromarray(face_image)
             cv2.rectangle(img, (left, top), (right, bottom), (0, 0, 255), 2)
             #pil_image.show() #face图片 单独的
-        #cv2.imwrite(img_build_file_path,img, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
-        #cv2.imshow(img)
+            #2018-01-11
+
+            save_face_into_faces(face_image) #保存面部到faces中
+            #end
 
 
         #data = cv2.imencode('.jpg', frame)[1].tostring()
-
-        bytes_data = cv2.imencode('.jpg', img)[1]
+        bytes_data = cv2.imencode('.jpg', smail_img)[1]
         content=base64.b64encode(bytes_data)
         #content = base64.encodebytes(bytes_data)
         content=str(content, encoding = "utf-8")
         content="data:image/jpeg;base64,%s" % (content)
-        return jsonify(base64=content,faces=faces)
+        return jsonify(err="no",base64=content,faces=faces)
 
 @app.route('/api/face/recognize_faces',methods=['GET', 'POST'])
 def api_recognize_faces():

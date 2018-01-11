@@ -1,11 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-<br>
+<p></p>
 <h1 class="ui header">Face 检测</h1>
 <div class="ui small header">图片中的脸数：<span id="faces">待检测</span></div>
-{% if text %}
-  <img src="{{ url_for('static', filename='build/'+text) }}" />
-{% endif %}
+
+<div id="alert_msg" class="ui modal">
+  <div class="header">信息提示</div>
+  <div id="text" class="content">
+    <li><a class="ui image label"><img src="{{ url_for('static', filename='avatar/joe.jpg') }}"> Joe </a></li>
+    <br>
+    <li><a class="ui image label"><img src="{{ url_for('static', filename='avatar/elliot.jpg') }}"> Elliot </a></li>
+    <br>
+    <li><a class="ui image label"><img src="{{ url_for('static', filename='avatar/stevie.jpg') }}"> Stevie </a></li>
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">好的</div>
+  </div>
+</div>
 
 <style>
 body{
@@ -79,13 +90,19 @@ input{
                 async: true,
                 success: function (result) {
                   //
+                  if(result.err=="yes"){
+                    $('#text').text(result.msg);
+                    $('.modal').modal('show')
+                  }
+                  if(result.err=="no"){
+                    $('#out_img').attr('src', result.base64);
+                    $('#faces').text(result.faces)
+                    $('#in_img').hide();
+                    $('#out_img').show();
+                  }
                   $('#loading').hide();
-                  $('#out_img').attr('src', result.base64);
-                  $('#faces').text(result.faces)
-                  $('#in_img').hide();
-                  $('#out_img').show();
-                    console.log('msg:');
-                    console.dir(result);
+                  console.log('msg:');
+                  console.dir(result);
                 },
                 error: function (result) {
                     console.dir(result);
@@ -97,14 +114,16 @@ input{
             /*input_file：文件按钮对象*/
             /*get_data: 转换成功后执行的方法*/
             if (typeof (FileReader) === 'undefined') {
-                alert("抱歉，你的浏览器不支持 FileReader，不能将图片转换为Base64，请使用现代浏览器操作！");
+                $('#text').text('你的浏览器不支持');
+                $('.modal').modal('show')
             } else {
                 try {
                     /*图片转Base64 核心代码*/
                     var file = input_file.files[0];
                     //这里我们判断下类型如果不是图片就返回 去掉就可以上传任意文件
                     if (!/image\/\w+/.test(file.type)) {
-                        alert("请确保文件为图像类型");
+                        $('#text').text('请确保文件为图像类型');
+                        $('.modal').modal('show')
                         return false;
                     }
                     var reader = new FileReader();
@@ -113,7 +132,8 @@ input{
                     }
                     reader.readAsDataURL(file);
                 } catch (e) {
-                    alert('图片转Base64出错啦！' + e.toString())
+                    $('#text').text('图片转Base64出错啦！');
+                    $('.modal').modal('show')
                 }
             }
         }
