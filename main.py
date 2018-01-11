@@ -124,7 +124,10 @@ def api_findfaces():
         face_locations = face_recognition.face_locations(image)
         faces=len(face_locations)
         print("I found {} face(s) in this photograph.".format(len(face_locations)))
+        find_users=[] #找到的用户们
+        i=0
         for face_location in face_locations:
+            i+=1
             # Print the location of each face in this image
             top, right, bottom, left = face_location
             print("A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
@@ -150,6 +153,10 @@ def api_findfaces():
             #results = face_recognition.compare_faces(face_unknow_locations,known_faces)
             if(results[0]):
                 print("马云")
+                #font=cv2.FONT_HERSHEY_SIMPLEX
+                #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
+                find_users.append({"name":"马云"})
+
             #对比结束
 
         #data = cv2.imencode('.jpg', frame)[1].tostring()
@@ -158,7 +165,7 @@ def api_findfaces():
         #content = base64.encodebytes(bytes_data)
         content=str(content, encoding = "utf-8")
         content="data:image/jpeg;base64,%s" % (content)
-        return jsonify(err="no",base64=content,faces=faces)
+        return jsonify(err="no",base64=content,faces=faces,find_users=find_users)
 
 @app.route('/api/face/recognize_faces',methods=['GET', 'POST'])
 def api_recognize_faces():

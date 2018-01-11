@@ -5,13 +5,9 @@
 <div class="ui small header">图片中的脸数：<span id="faces">待检测</span></div>
 
 <div id="alert_msg" class="ui modal">
-  <div class="header">信息提示</div>
+  <div id="text_title" class="header">信息提示</div>
   <div id="text" class="content">
-    <li><a class="ui image label"><img src="{{ url_for('static', filename='avatar/joe.jpg') }}"> Joe </a></li>
-    <br>
-    <li><a class="ui image label"><img src="{{ url_for('static', filename='avatar/elliot.jpg') }}"> Elliot </a></li>
-    <br>
-    <li><a class="ui image label"><img src="{{ url_for('static', filename='avatar/stevie.jpg') }}"> Stevie </a></li>
+    <li><a class="ui image label"><img src="{{ url_for('static', filename='avatar/joe.jpg') }}"> Joe </a></li><br>
   </div>
   <div class="actions">
     <div class="ui cancel button">好的</div>
@@ -99,10 +95,20 @@ input{
                     $('#faces').text(result.faces)
                     $('#in_img').hide();
                     $('#out_img').show();
+
+                    var find_users=result.find_users;
+                    console.dir(find_users);
+                    for (var i = 0; i < find_users.length; i++) {
+                      user=find_users[i];
+
+                      console.log(user);
+                      $('#text_title').text("找到了");
+                      $('#text').text(user.name);
+                      $('.modal').modal('show')
+                    }
                   }
                   $('#loading').hide();
-                  console.log('msg:');
-                  console.dir(result);
+
                 },
                 error: function (result) {
                     console.dir(result);

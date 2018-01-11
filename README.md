@@ -21,6 +21,11 @@ sudo pip install opencv-python
 https://www.archlinux.org/packages/community/x86_64/hdf5/download/
 https://www.archlinux.org/packages/extra/x86_64/opencv/download/
 
+
+###freebsd
+# pkg install python36
+# pkg install py36-pillow
+
 ```
 @app.route('/upload', methods=['GET', 'POST'])
 def face():
