@@ -1,27 +1,66 @@
 # face
 
-opencv
+#arch linux
+
+首先，更改pip为国内源：
 
 ```
-http://dlib.net/files/dlib-19.8.tar.bz2
+nano $HOME/.pip/pip.conf
 ```
 
 ```
-sudo pacman -S boost
+[global]
+index-url = http://pypi.douban.com/simple
 ```
 
+安装必要的工具：
+
 ```
-sudo pip install face_recognition
-sudo pip install pillow
-sudo pip install numpy
-sudo pip install opencv-python
+# pacman -S cmake
+# pacman -S boost
+# pacman -S opencv
+# pacman -S hdf5
+```
+安装dlib：
+
+```
+# wget http://dlib.net/files/dlib-19.8.tar.bz2
+# tar jxvf dlib-19.8.tar.bz2
+# cd dlib-19.8
+# python setup.py install
 ```
 
+或者
+
+```
+sudo pip install dlib
+```
+
+安装pip，如果没有的话：
+```
 # wget https://bootstrap.pypa.io/get-pip.py
 # python get-pip.py
+```
+接下来安装python包：
+```
+# pip install pillow
+# pip install numpy
+# pip install opencv-python
+# install boost
+# install Flask
+# install pillow
+# install face_recognition
+```
 
-https://www.archlinux.org/packages/community/x86_64/hdf5/download/
-https://www.archlinux.org/packages/extra/x86_64/opencv/download/
+运行：
+```
+python main.py
+```
+
+查看效果：
+```
+http://localhost:5000
+```
 
 
 ###freebsd
