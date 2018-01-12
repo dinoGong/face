@@ -17,14 +17,35 @@ sudo pip install numpy
 sudo pip install opencv-python
 ```
 
+# wget https://bootstrap.pypa.io/get-pip.py
+# python get-pip.py
 
 https://www.archlinux.org/packages/community/x86_64/hdf5/download/
 https://www.archlinux.org/packages/extra/x86_64/opencv/download/
 
 
 ###freebsd
+```
+# pkg install cmake
+# pkg install wget
+# wget http://dlib.net/files/dlib-19.8.tar.bz2
+# tar jxvf dlib-19.8.tar.bz2
+# python setup.py install
+```
+如果安装不成功，也可以：
+
+```
+# wget https://bootstrap.pypa.io/get-pip.py
+# python get-pip.py
+```
+```
+pip install boost
+```
+```
+# pkg install gcc
 # pkg install python36
 # pkg install py36-pillow
+```
 
 ```
 @app.route('/upload', methods=['GET', 'POST'])
@@ -66,3 +87,58 @@ def face():
     if request.method == 'GET':
         return render_template('face.html',title="面部识别")
 ```
+
+
+
+###debian
+安装必要的编译工具
+```
+apt install cmake build-essential libgtk-3-dev
+apt install libboost-all-dev
+```
+
+# wget https://bootstrap.pypa.io/get-pip.py
+# python get-pip.py
+
+如果用的是云服务器（虚拟机），增加交换内存。
+```
+dd if=/dev/zero of=/swap bs=1024 count=1M
+mkswap /swap
+swapon /swap
+echo "/swap  swap  swap  sw  0  0" >> /etc/fstab
+```
+下载并安装dlib
+```
+wget http://dlib.net/files/dlib-19.8.tar.bz2
+tar jxvf dlib-19.8.tar.bz2
+cd dlib-19.8
+python setup.py
+```
+设置成pip国内五道口职业技术学院的源
+
+```
+# mkdir $HOME/.pip
+# nano $HOME/.pip/pip.conf
+```
+```
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple/
+[install]
+trusted-host=pypi.tuna.tsinghua.edu.cn   
+```
+
+然后一路安装python包
+```
+pip install Flask
+pip install pillow
+pip install numpy
+pip install face_recognition
+```
+
+
+
+
+#armbian && dietpi
+
+
+在nanopi、orangepi和树梅派上面安装。
