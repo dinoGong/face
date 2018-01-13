@@ -63,28 +63,7 @@ http://localhost:5000
 ```
 
 
-###freebsd
-```
-# pkg install cmake
-# pkg install wget
-# wget http://dlib.net/files/dlib-19.8.tar.bz2
-# tar jxvf dlib-19.8.tar.bz2
-# python setup.py install
-```
-如果安装不成功，也可以：
 
-```
-# wget https://bootstrap.pypa.io/get-pip.py
-# python get-pip.py
-```
-```
-pip install boost
-```
-```
-# pkg install gcc
-# pkg install python36
-# pkg install py36-pillow
-```
 
 ```
 @app.route('/upload', methods=['GET', 'POST'])
@@ -134,6 +113,7 @@ def face():
 ```
 apt install cmake build-essential libgtk-3-dev
 apt install libboost-all-dev
+apt install libboost-filesystem-dev
 ```
 
 # wget https://bootstrap.pypa.io/get-pip.py
@@ -177,7 +157,79 @@ pip install face_recognition
 
 
 
-#armbian && dietpi
 
 
-在nanopi、orangepi和树梅派上面安装。
+##ubuntu
+
+还是ubuntu自在，资料多，包多，安装方便。
+
+```
+sudo apt install python3-pip
+wget http://dlib.net/files/dlib-19.8.tar.bz2
+tar jxvf dlib-19.8.tar.bz2
+```
+
+安装 cmake
+```
+sudo apt install cmake
+```
+
+安装
+```
+mkdir build; cd build; cmake .. ; cmake --build .
+```
+
+```
+sudo apt install libboost-dev libboost-python-dev
+pip3 install boost
+sudo apt-get install python-numpy
+```
+
+```
+sudo dd if=/dev/zero of=/swapfile bs=2M count=1024
+mkswap /swapfile
+swapon /swapfile
+```
+
+```
+nano /etc/fstab
+```
+```
+/swapfile  swap  swap    defaults 0 0
+```
+
+
+
+```
+sudo python3 setup.py install
+```
+
+```
+git clone http://www.github.com/gpiopi/face
+```
+
+使用国内源，提高速度。
+
+```
+sudo mkdir nano $HOME/.pip
+sudo nano $HOME/.pip/pip.conf
+```
+
+```
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+安装face_recognition
+```
+sudo pip3 install face_recognition
+sudo pip3 install Flask
+sudo apt install python-opencv
+pip3 install opencv-python
+```
+
+```
+git clone http://www.github.com/gpiopi/face
+cd face
+python main.py
+```
