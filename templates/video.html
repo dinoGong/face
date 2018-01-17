@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<script src="{{ url_for('static', filename='tracking/tracking-min.js') }}"></script>
+<script src="{{ url_for('static', filename='tracking/data/face-min.js') }}"></script>
+<style>
+  body{
+    margin: 0;
+    padding: 0;
+  }
+  video, canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  </style>
+
+      <video id="video" preload autoplay loop muted></video>
+      <canvas id="canvas"></canvas>
+      <img id="img" src="" alt="">
+
+<script>
+    window.onload = function() {
+      var width=$(window).width();
+      var height=$(window).height();
+      //height=width
+      $('#video').attr('width',width);
+      $('#video').attr('height',height);
+      $('#canvas').attr('width',width);
+      $('#canvas').attr('height',height);
+      var video = document.getElementById('video');
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+
+      var tracker = new tracking.ObjectTracker('face');
+      tracker.setInitialScale(4);
+      tracker.setStepSize(2);
+      tracker.setEdgesDensity(0.1);
+      tracking.track('#video', tracker, { camera: true });
+      tracker.on('track', function(event) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        event.data.forEach(function(rect) {
+          console.log(rect)
+          context.strokeStyle = '#a64ceb';
+          context.lineWidth="6";
+          context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+          context.font = '11px Helvetica';
+          context.fillStyle = "#fff";
+          context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+          context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+        });
+
+      });
+    };
+  </script>
+{% endblock %}

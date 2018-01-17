@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+<script src="{{ url_for('static', filename='facedetection/jquery.facedetection.min.js') }}"></script>
+<div id="alert_msg" class="ui modal">
+  <div id="text_title" class="header">信息提示</div>
+  <div id="text" class="content">
+    <li><a class="ui image label"></a></li><br>
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">好的</div>
+  </div>
+</div>
+<style>
+  body{
+    margin: 0;
+    padding: 0;
+  }
+  video, canvas {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right:0;
+
+  }
+  </style>
+
+      <video id="video" preload autoplay loop muted></video>
+      <canvas id="canvas_rect"></canvas>
+      <canvas id="canvas" style="display:none"></canvas>
+
+<script>
+    window.onload = function() {
+
+      //得到网页大小，暂时没用上。
+      var width=$(window).width();
+      var height=$(window).height();
+
+      //video
+      var video = document.getElementById('video');
+      //canvas
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+
+
+
+
+      //框人脸的
+      var canvas_rect = document.getElementById('canvas_rect');
+      var context_rect = canvas_rect.getContext('2d');
+
+
+
+      //开启视频
+      navigator.getUserMedia = navigator.getUserMedia ||
+                         navigator.webkitGetUserMedia ||
+                         navigator.mozGetUserMedia;
+
+      if (navigator.getUserMedia) {
+         navigator.getUserMedia({ audio: true, video: { width: width, height: height} },
+            function(stream) {
+               video.src = window.URL.createObjectURL(stream);
+               video.onloadedmetadata = function(e) {
+                 video.play();
+
+                 //取得视频高度和宽度（非dom元素）
+                 var width=video.videoWidth;
+                 var height=video.videoHeight;
+                 //设置画布宽度高度和视频一致
+
+                 $('#canvas_rect').attr('width',width);
+                 $('#canvas_rect').attr('height',height);
+
+                 var interval_id=null;
+                 var loop=true;//默认设置成可以循环
+
+                 function checkface(){
+                   $('#video').faceDetection({
+                        complete: function (faces) {
+                          face=faces[0];
+                          if(face!=undefined){
+                            //console.log(face);
+
+                            //清除画布
+                            context_rect.clearRect(0,0,width,height);
+                            context.clearRect(0,0,width,height);
+
+                            //得到 脸部的坐标和大小
+                            x=face.x;
+                            y=face.y;
+                            w=face.width;
+                            h=face.height;
+
+                            //设置颜色粗细等
+                            context_rect.strokeStyle = '#ff0';
+                            context_rect.lineWidth="6";
+                            context_rect.font = '11px Helvetica';
+                            context_rect.fillStyle = "#fff";
+                            //绘制框选
+                            context_rect.strokeRect(x,y,w,h);
+
+                            //按照脸的大小设置画布大小
+                            $('#canvas').attr('width',w);
+                            $('#canvas').attr('height',h);
+                            //把视频中的脸载入进来
+
+                            context.drawImage(video,x,y,w,h,0,0,w,h);
+                            //得到 base 64 的编码图像
+                            base64img=canvas.toDataURL("image/png");
+                            //调用API，得到结果。
+                            //
+                            $.ajax({
+                                url: "/api/face/checkface",
+                                type: "post",
+                                dataType: "json",
+                                data: {
+                                    "img_base64": base64img,
+                                },
+                                async: true,
+                                success: function (result) {
+                                  //
+                                  if(result.err=="yes"){
+                                    //$('#text').text(result.msg);
+                                    //$('.modal').modal('show')
+                                    console.log(result.msg);
+                                  }
+                                  if(result.err=="no"){
+                                    //var find_user=result.find_user;
+                                    var name=result.find_user.name
+                                    console.log(result.find_user.name);
+                                    if(loop){
+                                      $('#text_title').text("找到了");
+                                      $('#text').text(name);
+                                      $('.modal').modal('show');
+                                      loop=false;//取消循环
+                                      clearInterval(interval_id)//取消循环
+                                    }
+                                  }
+                                },
+                                error: function (result) {
+                                    console.dir(result);
+                                }
+                            });
+                            //
+                          }
+                        }
+                    });
+                 }
+
+                 /*
+                 var start = null;
+                 function step(timestamp) {
+                    if (!start) start = timestamp;
+                    var progress = timestamp - start;
+                    if (progress > 2000) {
+                      //dobegin
+                      checkface();
+                      //doend
+                    }
+                    window.requestAnimationFrame(step);
+                  }
+                  window.requestAnimationFrame(step);
+                 */
+
+                   interval_id=setInterval(function(){
+                     //base64img=canvas.toDataURL("image/png");
+                     //context.drawImage(video, 0, 0, width, height);
+                     //img.src=base64img;
+                    checkface();
+                   },10);
+                 //context.drawImage(video, 0, 0, width, height);
+               };
+            },
+            function(err) {
+               console.log("The following error occurred: " + err.name);
+            }
+         );
+      } else {
+         console.log("getUserMedia not supported");
+      }
+    };
+  </script>
+{% endblock %}

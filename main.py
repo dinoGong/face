@@ -106,7 +106,7 @@ def api_findfaces():
         #2018-01-11 图片缩放
         o_width=img.shape[0]
         o_height=img.shape[1]
-        max_width=800
+        max_width=1600
         if(o_width>max_width):
             width=max_width
             b=o_width/width
@@ -158,33 +158,6 @@ def api_findfaces():
                 #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
                 find_users.append({"name":"马云"})
 
-            image_gonghui = face_recognition.load_image_file(app.config['AVATAR_FOLDER']+"/gonghui.png")
-            face_know_encoding=face_recognition.face_encodings(image_gonghui)[0]
-            known_faces = [
-                face_know_encoding
-            ]
-
-            results = face_recognition.compare_faces(known_faces, face_unknow_encoding)
-            #results = face_recognition.compare_faces(face_unknow_locations,known_faces)
-            if(results[0]):
-                #font=cv2.FONT_HERSHEY_SIMPLEX
-                #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
-                find_users.append({"name":"semioe董事长：宫辉"})
-
-            image_mayingjie = face_recognition.load_image_file(app.config['AVATAR_FOLDER']+"/mayingjie.png")
-            face_know_encoding=face_recognition.face_encodings(image_mayingjie)[0]
-            known_faces = [
-                face_know_encoding
-            ]
-
-            results = face_recognition.compare_faces(known_faces, face_unknow_encoding)
-            #results = face_recognition.compare_faces(face_unknow_locations,known_faces)
-            if(results[0]):
-                #font=cv2.FONT_HERSHEY_SIMPLEX
-                #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
-                find_users.append({"name":"semioe CEO：马英杰"})        
-            #对比结束
-
         #data = cv2.imencode('.jpg', frame)[1].tostring()
         bytes_data = cv2.imencode('.jpg', img)[1]
         content=base64.b64encode(bytes_data)
@@ -192,6 +165,61 @@ def api_findfaces():
         content=str(content, encoding = "utf-8")
         content="data:image/jpeg;base64,%s" % (content)
         return jsonify(err="no",base64=content,faces=faces,find_users=find_users)
+
+@app.route('/api/face/checkface',methods=['GET', 'POST'])
+def api_checkface():
+    if request.method == 'POST':
+        img_base64=request.form['img_base64']
+
+        if(len(img_base64)<10):
+            return jsonify(err="yes",msg="请上传图片")
+
+        img = base64_to_cv2_img(img_base64)
+        img_file_path=save_img(img)
+        img_file=img_file_path
+        image = face_recognition.load_image_file(img_file)
+        #img = cv2.imread(img_file)
+        face_locations = face_recognition.face_locations(image)
+        faces=len(face_locations)
+        print("I found {} face(s) in this photograph.".format(len(face_locations)))
+
+        find_user=dict() #找到的用户们
+
+        if(faces==0):
+            return jsonify(err="yes",find_user=find_user,msg="找不的脸")
+        i=0
+        for face_location in face_locations:
+            i+=1
+            # Print the location of each face in this image
+            top, right, bottom, left = face_location
+            print("A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
+            # You can access the actual face itself like this:
+            face_image = image[top:bottom, left:right] #识别到的人脸
+            pil_image = Image.fromarray(face_image)
+            cv2.rectangle(img, (left, top), (right, bottom), (0, 0, 255), 2)
+            #pil_image.show() #face图片 单独的
+            #2018-01-11
+            save_face_into_faces(face_image) #保存面部到faces中
+            #end
+            #开始对比
+            unknow=face_recognition.face_encodings(face_image)
+            if(len(unknow)==0):
+                return jsonify(err="yes",find_user=find_user,msg="找不到面目特征")
+            face_unknow_encoding = face_recognition.face_encodings(face_image)[0]
+            image_mayun = face_recognition.load_image_file(app.config['AVATAR_FOLDER']+"/mayun.png")
+            face_know_encoding=face_recognition.face_encodings(image_mayun)[0]
+            known_faces = [
+                face_know_encoding
+            ]
+            results = face_recognition.compare_faces(known_faces, face_unknow_encoding)
+            #results = face_recognition.compare_faces(face_unknow_locations,known_faces)
+            if(results[0]):
+                print("G")
+                #font=cv2.FONT_HERSHEY_SIMPLEX
+                #cv2.putText(img, '马云', (left, top), font,1.2,(255,255,255),2)
+                find_user['name']="马云"
+
+        return jsonify(err="no",find_user=find_user)
 
 @app.route('/api/face/recognize_faces',methods=['GET', 'POST'])
 def api_recognize_faces():
@@ -252,6 +280,11 @@ def api_recognize_faces():
 @app.route('/')
 def home():
     return render_template('index.html',title="人脸识别")
+#video 2018-01-17
+@app.route('/video')
+def video():
+    return render_template('video2.html',title="人脸识别")
+#video end
 @app.route('/find_faces')
 def find_faces():
     return render_template('find_faces.html',title="人脸识别")
