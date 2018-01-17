@@ -127,14 +127,17 @@
                                   if(result.err=="no"){
                                     //var find_user=result.find_user;
                                     var name=result.find_user.name
-                                    console.log(result.find_user.name);
-                                    if(loop){
-                                      $('#text_title').text("找到了");
-                                      $('#text').text(name);
-                                      $('.modal').modal('show');
-                                      loop=false;//取消循环
-                                      clearInterval(interval_id)//取消循环
+                                    if(name!=undefined){
+                                      console.log(name);
+                                      if(loop){
+                                        $('#text_title').text("找到了");
+                                        $('#text').text(name);
+                                        $('.modal').modal('show');
+                                        loop=false;//取消循环
+                                        clearInterval(interval_id)//取消循环
+                                      }
                                     }
+
                                   }
                                 },
                                 error: function (result) {
